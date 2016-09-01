@@ -1,4 +1,4 @@
-FROM nginx:1.9.9
+FROM nginx:1.10.1
 WORKDIR /tmp
 
 # Environment variables used throughout this Dockerfile
@@ -17,23 +17,20 @@ ENV JENKINS_FOLDER /usr/share/jenkins/
 ENV JAVA_HOME "/usr/lib/jvm/java-7-openjdk-amd64"
 
 RUN apt-get update
-RUN apt-get install -y git python zip curl default-jre jq
+RUN apt-get install -y git python zip curl default-jre jq gradle ant maven
 
 RUN mkdir -p /var/log/nginx/jenkins
 COPY conf/nginx/nginx.conf /etc/nginx/nginx.conf
 
 RUN mkdir -p $JENKINS_HOME
 RUN mkdir -p ${JENKINS_FOLDER}/war
-ADD ${JENKINS_WAR_URL} ${JENKINS_FOLDER}/jenkins.war
 
-COPY scripts/plugin_install.sh /usr/local/jenkins/bin/plugin_install.sh
+COPY target/jenkins-*.war ${JENKINS_FOLDER}/jenkins.war
 COPY scripts/bootstrap.py /usr/local/jenkins/bin/bootstrap.py
 
 COPY conf/jenkins/config.xml "${JENKINS_STAGING}/config.xml"
 COPY conf/jenkins/jenkins.model.JenkinsLocationConfiguration.xml "${JENKINS_STAGING}/jenkins.model.JenkinsLocationConfiguration.xml"
 COPY conf/jenkins/nodeMonitors.xml "${JENKINS_STAGING}/nodeMonitors.xml"
-
-RUN /usr/local/jenkins/bin/plugin_install.sh "${JENKINS_STAGING}/plugins"
 
 # Override the default property for DNS lookup caching
 RUN echo 'networkaddress.cache.ttl=60' >> ${JAVA_HOME}/jre/lib/security/java.security
@@ -42,7 +39,8 @@ CMD /usr/local/jenkins/bin/bootstrap.py && nginx && \
 java ${JVM_OPTS}                                    \
     -Dhudson.udp=-1                                 \
     -Djava.awt.headless=true                        \
-    -DhudsonDNSMultiCast.disabled=true              \
+    -Dhudson.DNSMultiCast.disabled=true             \
+    -Djenkins.install.runSetupWizard=false          \
     -jar ${JENKINS_FOLDER}/jenkins.war              \
     --httpPort=${PORT1}                             \
     --webroot=${JENKINS_FOLDER}/war                 \

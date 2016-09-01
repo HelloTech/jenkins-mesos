@@ -4,6 +4,7 @@ Reconfigures a Jenkins master running in Docker at container runtime.
 """
 
 from __future__ import print_function
+
 import os
 import re
 import subprocess
@@ -22,7 +23,7 @@ def is_firstrun(jenkins_home_dir):
     return len(os.listdir(jenkins_home_dir)) == 0
 
 
-def populate_jenkins_config_xml(config_xml, master, name, host, port):
+def populate_jenkins_config_xml(config_xml, master, name, host, port, role, user):
     """Modifies a Jenkins master's 'config.xml' at runtime. Essentially, this
     replaces certain configuration options of the Mesos plugin, such as the
     framework name and the Jenkins URL that agents use to connect back to the
@@ -32,37 +33,33 @@ def populate_jenkins_config_xml(config_xml, master, name, host, port):
     :param name: the name of the framework, e.g. 'jenkins'
     :param host: the Mesos agent the task is running on
     :param port: the Mesos port the task is running on
+    :param role: The role passed to the internal Jenkins configuration that denotes which resources can be launched
+    :param user: the user the task is running on
     """
-    tree = ET.parse(config_xml)
-    root = tree.getroot()
+    tree, root = _get_xml_root(config_xml)
     mesos = root.find('./clouds/org.jenkinsci.plugins.mesos.MesosCloud')
 
-    mesos_master = mesos.find('./master')
-    mesos_master.text = master
-
-    mesos_frameworkName = mesos.find('./frameworkName')
-    mesos_frameworkName.text = name
-
-    mesos_jenkinsURL = mesos.find('./jenkinsURL')
-    mesos_jenkinsURL.text = ''.join(['http://', host, ':', port])
-
+    _find_and_set(mesos, './master', master)
+    _find_and_set(mesos, './frameworkName', name)
+    _find_and_set(mesos, './jenkinsURL', "http://{}:{}".format(host, port))
+    _find_and_set(mesos, './role', role)
+    _find_and_set(mesos, './slavesUser', user)
+        
     tree.write(config_xml)
 
 
-def populate_jenkins_location_config(location_xml, host, port):
-    """Modifies a Jenkins master's location config at runtime. Essentially,
-    this replaces the value of 'jenkinsUrl' with a newly constructed URL
-    based on the host and port that the Marathon app instance is running on.
+def populate_jenkins_location_config(location_xml, url):
+    """Modifies a Jenkins master's location config at runtime. This
+    replaces the value of 'jenkinsUrl' with url.
 
     :param location_xml: the path to Jenkins'
         'jenkins.model.JenkinsLocationConfiguration.xml' file
-    :param host: the Mesos agent the task is running on
-    :param port: the Mesos port the task is running on
+    :type location_xml: str
+    :param url: the Jenkins instance URL
+    :type url: str
     """
-    tree = ET.parse(location_xml)
-    root = tree.getroot()
-    jenkinsUrl = root.find('jenkinsUrl')
-    jenkinsUrl.text = ''.join(['http://', host, ':', port])
+    tree, root = _get_xml_root(location_xml)
+    _find_and_set(root, 'jenkinsUrl', url)
     tree.write(location_xml)
 
 
@@ -111,6 +108,8 @@ def populate_known_hosts(hosts, dest_file):
 
 def main():
     try:
+        jenkins_agent_user = os.environ['JENKINS_AGENT_USER']
+        jenkins_agent_role = os.environ['JENKINS_AGENT_ROLE']
         jenkins_staging_dir = os.environ['JENKINS_STAGING']
         jenkins_home_dir = os.environ['JENKINS_HOME']
         jenkins_framework_name = os.environ['JENKINS_FRAMEWORK_NAME']
@@ -127,6 +126,12 @@ def main():
         print("ERROR: missing one or more required environment variables.")
         return 1
 
+    # optional environment variables
+    jenkins_root_url = os.getenv(
+            'JENKINS_ROOT_URL',
+            "http://{}:{}".format(marathon_host, marathon_nginx_port))
+
+
     # If this is the first run of the script, make changes to the staging
     # directory first, so we can then use these files to populate the host
     # volume. If data exists in that directory (e.g. Marathon has restarted
@@ -140,11 +145,13 @@ def main():
         mesos_master,
         jenkins_framework_name,
         marathon_host,
-        marathon_nginx_port)
+        marathon_nginx_port,
+        jenkins_agent_role,
+        jenkins_agent_user)
 
     populate_jenkins_location_config(os.path.join(
         jenkins_data_dir, 'jenkins.model.JenkinsLocationConfiguration.xml'),
-        marathon_host, marathon_nginx_port)
+        jenkins_root_url)
 
     populate_known_hosts(ssh_known_hosts, '/etc/ssh/ssh_known_hosts')
 
@@ -166,6 +173,33 @@ def main():
         marathon_nginx_port,
         marathon_jenkins_port,
         jenkins_app_context)
+
+
+def _get_xml_root(config_xml):
+    """Return the ET tree and root XML element.
+
+    :param config_xml: path to config XML file
+    :type config_xml: str
+    :return: a tuple (tree,root)
+    :rtype: tuple
+    """
+    tree = ET.parse(config_xml)
+    root = tree.getroot()
+    return tuple([tree, root])
+
+
+def _find_and_set(element, term, new_text):
+    """Find the desired term within the XML element and replace
+    its text with text.
+
+    :param element: XML element
+    :type element: xml.etree.ElementTree.Element
+    :param term: XML element to find
+    :type term: str
+    :param new_text: New element text
+    :type new_text: str
+    """
+    element.find(term).text = new_text
 
 
 if __name__ == '__main__':

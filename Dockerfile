@@ -43,6 +43,7 @@ java ${JVM_OPTS}                                    \
     -Dhudson.udp=-1                                 \
     -Djava.awt.headless=true                        \
     -DhudsonDNSMultiCast.disabled=true              \
+    -Djenkins.slaves.DefaultJnlpSlaveReceiver.disableStrictVerification=true \
     -jar ${JENKINS_FOLDER}/jenkins.war              \
     --httpPort=${PORT1}                             \
     --webroot=${JENKINS_FOLDER}/war                 \

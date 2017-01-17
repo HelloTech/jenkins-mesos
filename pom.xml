@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>org.jenkins-ci.main</groupId>
 			<artifactId>jenkins-war</artifactId>
-			<version>2.32.1</version>
+			<version>2.19.3</version><!--this version cannot be set any higher then 2.19.3 until we can update dcos/marathon/mesos-->
 			<type>war</type>
 		</dependency>
 	</dependencies>

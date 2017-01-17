@@ -10,7 +10,8 @@ WORKDIR /tmp
 #                   data directory. This cannot be populated before Marathon
 #                   has a chance to create the host-container volume mapping.
 #
-ENV JENKINS_WAR_URL https://updates.jenkins-ci.org/download/war/2.19.1/jenkins.war
+# 2.19.3 is the highest version we can currently use until dcos is updated
+ENV JENKINS_WAR_URL https://updates.jenkins-ci.org/download/war/2.19.3/jenkins.war
 ENV JENKINS_STAGING /var/jenkins_staging
 ENV JENKINS_HOME /var/jenkins_home
 ENV JENKINS_FOLDER /usr/share/jenkins/

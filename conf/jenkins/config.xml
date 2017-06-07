@@ -18,7 +18,7 @@
   <clouds>
     <org.jenkinsci.plugins.mesos.MesosCloud plugin="mesos">
       <name>MesosCloud</name>
-      <nativeLibraryPath>/opt/mesosphere/lib/libmesos.so</nativeLibraryPath>
+      <nativeLibraryPath>/libmesos-bundle/lib/libmesos.so</nativeLibraryPath>
       <master>zk://leader.mesos:2181/mesos</master>
       <description></description>
       <frameworkName>jenkins</frameworkName>
@@ -36,13 +36,13 @@
           <executorCpus>0.1</executorCpus>
           <maxExecutors>4</maxExecutors>
           <executorMem>128</executorMem>
-          <remoteFSRoot>jenkins</remoteFSRoot>
+          <remoteFSRoot>/mnt/mesos/sandbox</remoteFSRoot>
           <idleTerminationMinutes>3</idleTerminationMinutes>
           <jvmArgs>-Xms16m -XX:+UseConcMarkSweepGC -Djava.net.preferIPv4Stack=true</jvmArgs>
           <jnlpArgs>-noReconnect</jnlpArgs>
           <containerInfo>
             <type>DOCKER</type>
-            <dockerImage>mesosphere/jenkins-dind:0.4.0-alpine</dockerImage>
+            <dockerImage>mesosphere/jenkins-dind:0.5.0-alpine</dockerImage>
             <networking>BRIDGE</networking>
             <useCustomDockerCommandShell>true</useCustomDockerCommandShell>
             <customDockerCommandShell>wrapper.sh</customDockerCommandShell>

@@ -1,5 +1,38 @@
 # Changes
 
+## v3.3.0-2.73.1 (2017-10-05)
+  * Upgrades Jenkins to 2.73.1 LTS
+  * Updates blueocean to version 1.2.4
+  * blueocean editor matches blueocean version
+  * Add pipeline-model-api dependency
+  * Add pipeline-model-extensions dependency
+  * Updates various plugins to latest versions
+
+## v3.2.4-2.60.2 (2017-09-25)
+  * Add blueocean scm-api dependency
+  * Add blueocean editor dependency
+
+## v3.2.3-2.60.2 (2017-09-07)
+  * Updates marathon-plugin to v1.6.0
+
+## v3.2.2-2.60.2 (2017-07-31)
+  * Upgrades Jenkins to 2.60.2 LTS
+  * Fixes escaping newlines in DC/OS authentication JSON
+  * Adds azure-credentials plugin
+  * Adds azure-vm-agents plugin
+  * Removes azure-slave-plugin
+
+## v3.2.1-2.60.1 (2017-07-11)
+  * Addresses security bulletin for 2017-07-10
+
+## v3.2.0-2.60.1 (2017-07-11)
+  * Upgrades Jenkins to 2.60.1 LTS
+  * Updates various plugins to latest versions
+
+## v3.1.0-2.46.2 (2017-05-05)
+  * Upgrades Jenkins to 2.46.2 LTS
+  * Updates various plugins to their latest versions
+
 ## v3.0.3-2.32.3 (2017-03-27)
   * Upgrades Jenkins to 2.32.3 LTS
   * Include entire LD_LIBRARY_PATH in Docker CMD

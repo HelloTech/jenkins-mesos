@@ -175,4 +175,3 @@ CMD export LD_LIBRARY_PATH=/libmesos-bundle/lib:/libmesos-bundle/lib/mesos:$LD_L
      --httpListenAddress=127.0.0.1                   \
      --ajp13ListenAddress=127.0.0.1                  \
      --prefix=${JENKINS_CONTEXT}
-docker rmi e5870017eb50 e5de96a19db1 fe4ab0d1886f 7eed4c5bd4cc 18708ea97c2b ed6343b08c4e 37cf5fc35722 07cad5ada638 2fb31441dfc0 8b705525f60a a87dd4aa9f16 2a8c2d9a7613 b1967505173c 502a766c45b1 07319253fd0e 331e9586a11c e5c95f3be2be 84fbcf2e933c 9766c6f277a9 fb72b6e811e3

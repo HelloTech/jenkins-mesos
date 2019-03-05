@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.150.2
+FROM jenkins/jenkins:2.150.3
 WORKDIR /tmp
 
 # Environment variables used throughout this Dockerfile
@@ -18,7 +18,7 @@ ARG JENKINS_STAGING=/usr/share/jenkins/ref/
 USER root
 
 # install dependencies
-RUN apt-get update && apt-get install -y nginx python zip jq
+RUN apt-get update && apt-get install -y nginx python zip jq sshpass nodejs
 # libmesos bundle
 RUN curl -fsSL "$LIBMESOS_DOWNLOAD_URL" -o libmesos-bundle.tar.gz  \
   && echo "$LIBMESOS_DOWNLOAD_SHA256 libmesos-bundle.tar.gz" | sha256sum -c - \
